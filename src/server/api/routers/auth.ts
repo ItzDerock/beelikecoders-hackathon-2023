@@ -3,6 +3,7 @@ import * as crypto from "crypto";
 
 import {
   createTRPCRouter,
+  protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 import { createAvatar } from "@dicebear/core";
@@ -40,4 +41,23 @@ export const authRouter = createTRPCRouter({
 
       return user;
     }),
+
+  me: protectedProcedure
+    .query(async ({ ctx }) => {
+      // get user
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          email: ctx.session.user.email!,
+        },
+
+        select: {
+          name: true,
+          email: true,
+          bio: true,
+          profilePicture: true
+        }
+      });
+
+      return user;
+    })
 });

@@ -8,9 +8,8 @@ import { Input } from "~/components/Input";
 import { AuthLayout } from "~/layouts/AuthLayout";
 import { useForm } from "@mantine/form";
 import Link from "next/link";
-import { getCsrfToken, signIn } from "next-auth/react";
-import { getServerSession } from "next-auth";
-import { authOptions } from "~/server/auth";
+import { signIn } from "next-auth/react";
+import { getServerAuthSession } from "~/server/auth";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useRouter } from "next/router";
@@ -67,8 +66,13 @@ const SignUp: NextPage<
             password: data.password,
             redirect: false,
           }).then((res) => {
+            console.log(res);
             if (!res?.ok) {
-              setError(res?.error ?? "Invalid credentials");
+              let error = res?.error;
+
+              if (error === "CredentialsSignin") error = "Invalid credentials";
+
+              setError(error ?? "Invalid credentials");
             } else {
               router.push("/");
             }
@@ -110,10 +114,7 @@ export default SignUp;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const [session, csrfToken] = await Promise.all([
-    getServerSession(context.req, context.res, authOptions),
-    getCsrfToken(context),
-  ]);
+  const session = await getServerAuthSession(context);
 
   if (session) {
     return {
@@ -122,11 +123,11 @@ export const getServerSideProps = async (
         permanent: false,
       },
 
-      props: { csrfToken },
+      props: {},
     };
   }
 
   return {
-    props: { csrfToken },
+    props: {},
   };
 };

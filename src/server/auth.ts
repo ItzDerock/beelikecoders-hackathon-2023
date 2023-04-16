@@ -7,6 +7,7 @@ import {
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "~/server/db";
+import { env } from "~/env.mjs";
 import crypto from "crypto";
 
 /**
@@ -19,14 +20,12 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      profilePicture: string;
     } & DefaultSession["user"];
   }
 
   interface User {
     // ...other properties
     // role: UserRole;
-    profilePicture: string;
   }
 }
 
@@ -37,14 +36,12 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
+    jwt: ({ token, user }) => ({
+      ...token,
+      user,
     }),
   },
+  secret: env.NEXTAUTH_SECRET!,
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -54,7 +51,6 @@ export const authOptions: NextAuthOptions = {
         username: {
           label: "Username",
           type: "text",
-          placeholder: "jsmith"
         },
 
         password: {
@@ -64,7 +60,6 @@ export const authOptions: NextAuthOptions = {
       },
 
       authorize: async (credentials, req) => {
-
         if (!credentials || !credentials.username || !credentials.password) {
           return null;
         }
@@ -81,13 +76,13 @@ export const authOptions: NextAuthOptions = {
             id: true,
             name: true,
             email: true,
-            profilePicture: true,
+            // profilePicture: true,
             password: true
           }
         });
 
         if (!user) {
-          return null;
+          throw new Error("Invalid credentials");
         }
 
         const [_, salt, hash] = user.password.split('.') as [string, string, string];
@@ -97,7 +92,7 @@ export const authOptions: NextAuthOptions = {
 
         // compare
         if (newHash !== hash) {
-          return null;
+          throw new Error("Invalid credentials");
         }
 
         // return user
@@ -105,7 +100,6 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           name: user.name,
           email: user.email,
-          profilePicture: user.profilePicture
         }
       },
     })
@@ -120,6 +114,12 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+
+  session: {
+    strategy: "jwt",
+  },
+
+  debug: true
 };
 
 /**

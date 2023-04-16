@@ -6,8 +6,7 @@ import { useForm } from "@mantine/form";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { api } from "~/utils/api";
-import { getServerSession } from "next-auth";
-import { authOptions } from "~/server/auth";
+import { getServerAuthSession } from "~/server/auth";
 import { useState } from "react";
 
 const SignUp: NextPage = () => {
@@ -112,7 +111,7 @@ export default SignUp;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const session = await getServerSession(context.req, context.res, authOptions);
+  const session = await getServerAuthSession(context);
 
   if (session) {
     return {
@@ -120,6 +119,8 @@ export const getServerSideProps = async (
         destination: "/",
         permanent: false,
       },
+
+      props: {},
     };
   }
 
