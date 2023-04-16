@@ -1,13 +1,15 @@
-import { type NextPage } from "next";
+import { GetServerSidePropsContext, type NextPage } from "next";
 import { Button } from "~/components/Button";
 import EventCard from "~/components/EventCard";
 import Navbar from "~/partials/Navbar";
+import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/utils/api";
 
 const Home: NextPage = () => {
   const meets = api.meets.events.useInfiniteQuery(
     {
       limit: 10,
+      registered: true,
     },
     {
       getNextPageParam: (data) => data.cursor,
@@ -52,3 +54,24 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const session = await getServerAuthSession(context);
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/auth/login",
+        permanent: false,
+      },
+
+      props: {},
+    };
+  }
+
+  return {
+    props: {},
+  };
+};

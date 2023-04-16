@@ -8,13 +8,15 @@ import { redirect } from "next/navigation";
 import { api } from "~/utils/api";
 import { getServerAuthSession } from "~/server/auth";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 const SignUp: NextPage = () => {
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const signup = api.auth.signup.useMutation({
     onSuccess: (data) => {
-      redirect("/auth/login?signupSuccess=true");
+      router.push("/auth/login?signupSuccess=true");
     },
 
     onError: (error) => {

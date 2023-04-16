@@ -29,7 +29,8 @@ export default function Navbar() {
         {/* left div */}
         <div className="flex w-1/2 flex-row gap-4 align-middle">
           <NavElement href="/">Home</NavElement>
-          <NavElement href="/about">About</NavElement>
+          <NavElement href="/create">Create Meet</NavElement>
+          <NavElement href="/registered-meets">Registered Meets</NavElement>
         </div>
 
         {/* right div */}

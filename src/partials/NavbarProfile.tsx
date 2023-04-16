@@ -17,9 +17,14 @@ export default function NavbarProfile() {
 
   return (
     <div className="flex flex-row gap-2">
-      <img src={me.data?.profilePicture} className="m-auto h-12 w-12" />
+      {me.data && me.data.profilePicture ? (
+        <img src={me.data.profilePicture} className="m-auto h-12 w-12" />
+      ) : (
+        <div className="m-auto h-12 w-12 rounded-full bg-slate-600" />
+      )}
+
       <div className="flex flex-col whitespace-nowrap">
-        <span>{data.user.name}</span>
+        <span>@{data.user.name}</span>
         <span
           className="cursor-pointer text-gray-400"
           onClick={() => {

@@ -17,8 +17,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, loading, ...props }, ref) => {
     let styles = stylesMap[variant ?? "primary"];
 
-    if (loading) {
-      styles = "bg-gray-500";
+    if (loading || props.disabled) {
+      styles = "bg-slate-700 cursor-not-allowed";
     }
 
     return (
@@ -27,8 +27,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={`rounded-md p-4 text-white ${styles} ${className ?? ""}`}
-        {...props}
         disabled={loading}
+        {...props}
       />
     );
   }
